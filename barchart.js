@@ -1,6 +1,12 @@
+// Source: https://bl.ocks.org/mbostock/3885304
 
 var svg = d3.select("svg"),
-    margin = { top: 20, right: 20, bottom: 30, left: 40 },
+    margin = {
+        top: 20,
+        right: 20,
+        bottom: 30,
+        left: 40
+    },
     width = +svg.attr("width") - margin.left - margin.right,
     height = +svg.attr("height") - margin.top - margin.bottom;
 
@@ -16,8 +22,12 @@ d3.tsv("data.tsv", function (d) {
 }, function (error, data) {
     if (error) throw error;
 
-    x.domain(data.map(function (d) { return d.letter; }));
-    y.domain([0, d3.max(data, function (d) { return d.frequency; })]);
+    x.domain(data.map(function (d) {
+        return d.letter;
+    }));
+    y.domain([0, d3.max(data, function (d) {
+        return d.frequency;
+    })]);
 
     g.append("g")
         .attr("class", "axis axis--x")
@@ -38,8 +48,14 @@ d3.tsv("data.tsv", function (d) {
         .data(data)
         .enter().append("rect")
         .attr("class", "bar")
-        .attr("x", function (d) { return x(d.letter); })
-        .attr("y", function (d) { return y(d.frequency); })
+        .attr("x", function (d) {
+            return x(d.letter);
+        })
+        .attr("y", function (d) {
+            return y(d.frequency);
+        })
         .attr("width", x.bandwidth())
-        .attr("height", function (d) { return height - y(d.frequency); });
+        .attr("height", function (d) {
+            return height - y(d.frequency);
+        });
 });

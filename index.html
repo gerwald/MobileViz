@@ -1,27 +1,102 @@
 <!DOCTYPE html>
-<head> 
-<meta charset="utf-8">
-<!--<meta name=viewport content="width=device-width,initial-scale=1">-->
+
+<head>
+    <meta charset="utf-8">
+    <!--<meta name=viewport content="width=device-width,initial-scale=1">-->
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="HandheldFriendly" content="true" />
 
     <link rel="stylesheet" href="deviceorientation.css">
     <link rel="stylesheet" href="barchart.css">
+    <link rel="stylesheet" href="mobileviz.css">
     <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+        crossorigin="anonymous"></script>
 
-</head> 
-<body> 
+</head>
 
-    <svg width="960" height="500"></svg>
+<body>
 
-    <a href=http://code.tutsplus.com/tutorials/an-introduction-to-the-device-orientation-api--cms-21067>Go back to the article</a> <h1>Device Orientation API</h1> <span id=do-unsupported class="api-support hidden">deviceorientation event not supported</span> <span id=dm-unsupported class="api-support hidden">devicemotion event not supported</span> <span id=cnc-unsupported class="api-support hidden">compassneedscalibration event not supported</span> <div id=do-results> <div id=cube class=cube> <div class="face one">1</div> <div class="face two">2</div> <div class="face three">3</div> <div class="face four">4</div> <div class="face five">5</div> <div class="face six">6</div> </div> <div id=do-info class=hidden> <p> Coordinates: (<span id=beta class=value>null</span>, <span id=gamma class=value>null</span>, <span id=alpha class=value>null</span>) <br> Position absolute? <span id=is-absolute class=value>unavailable</span> </p> </div> <div id=dm-info class=hidden> <p> Acceleration: (<span id=acceleration-x class=value>null</span>, <span id=acceleration-y class=value>null</span>, <span id=acceleration-z class=value>null</span>) m/s<sup>2</sup> </p> <p> Acceleration including gravity: (<span id=acceleration-including-gravity-x class=value>null</span>, <span id=acceleration-including-gravity-y class=value>null</span>, <span id=acceleration-including-gravity-z class=value>null</span>) m/s<sup>2</sup> </p> <p> Rotation rate: (<span id=rotation-rate-beta class=value>null</span>, <span id=rotation-rate-gamma class=value>null</span>, <span id=rotation-rate-alpha class=value>null</span>) </p> <p> Interval: <span id=interval class=value>0</span> milliseconds </p> </div> </div> <small class=author> Demo created by <a href=http://www.audero.it>Aurelio De Rosa</a> (<a href=https://twitter.com/AurelioDeRosa>@AurelioDeRosa</a>).<br> This demo is part of the <a href=https://github.com/AurelioDeRosa/HTML5-API-demos>HTML5 API demos repository</a>. </small> 
-    
+    <div id="mainContainer">
+        <span id="info"></span>
+        <svg width="960" height="500"></svg>
+
+
+        <h1>Device Orientation API</h1> 
+        <span id=do-unsupported class="api-support hidden">deviceorientation event not supported</span>
+        <span id=dm-unsupported class="api-support hidden">devicemotion event not supported</span>
+        <span id=cnc-unsupported class="api-support hidden">compassneedscalibration event not supported</span>
+        <div id=do-results>
+            <div id=cube class=cube>
+                <div class="face one">1</div>
+                <div class="face two">2</div>
+                <div class="face three">3</div>
+                <div class="face four">4</div>
+                <div class="face five">5</div>
+                <div class="face six">6</div>
+            </div>
+            <div id=do-info class=hidden>
+                <p> Coordinates: (<span id=beta class=value>null</span>, <span id=gamma class=value>null</span>, <span id=alpha class=value>null</span>)
+                    <br> Position absolute? <span id=is-absolute class=value>unavailable</span> </p>
+            </div>
+            <div id=dm-info class=hidden>
+                <p> Acceleration: (<span id=acceleration-x class=value>null</span>, <span id=acceleration-y class=value>null</span>,
+                    <span id=acceleration-z class=value>null</span>) m/s<sup>2</sup> </p>
+                <p> Acceleration including gravity: (<span id=acceleration-including-gravity-x class=value>null</span>, <span id=acceleration-including-gravity-y
+                        class=value>null</span>, <span id=acceleration-including-gravity-z class=value>null</span>) m/s<sup>2</sup>                </p>
+                <p> Rotation rate: (<span id=rotation-rate-beta class=value>null</span>, <span id=rotation-rate-gamma class=value>null</span>,
+                    <span id=rotation-rate-alpha class=value>null</span>) </p>
+                <p> Interval: <span id=interval class=value>0</span> milliseconds </p>
+            </div>
+        </div> <small class=author> Demo created by <a href=http://www.audero.it>Aurelio De Rosa</a> (<a href=https://twitter.com/AurelioDeRosa>@AurelioDeRosa</a>).
+        <br> 
+        This demo is part of the <a href=https://github.com/AurelioDeRosa/HTML5-API-demos>HTML5 API demos repository</a>. </small>
+    </div>
 
     <script src="barchart.js"></script>
     <script src="deviceorientation.js"></script>
     <script>
+        (function ($) {
+            var IS_IOS = /iphone|ipad/i.test(navigator.userAgent);
+            $.fn.nodoubletapzoom = function () {
+                if (IS_IOS)
+                    $(this).bind('touchstart', function preventZoom(e) {
+                        var t2 = e.timeStamp,
+                            t1 = $(this).data('lastTouch') || t2,
+                            dt = t2 - t1,
+                            fingers = e.originalEvent.touches.length;
+                        $(this).data('lastTouch', t2);
+                        if (!dt || dt > 500 || fingers > 1) return; // not double-tap
 
+                        e.preventDefault(); // double tap - prevent the zoom
+                        // also synthesize click events we just swallowed up
+                        $(this).trigger('click').trigger('click');
+                    });
+            };
+        })(jQuery);
 
+        // $(document).ready(function () {
+        //     function reorient(e) {
+        //         var portrait = (window.orientation % 180 == 0);
+        //         $("#mainContainer").css("-webkit-transform", portrait ? "" : "rotate(90deg)");
+        //         $("#mainContainer").width(!portrait ? $(window).width() : $(window).height());
+        //         $("#mainContainer").height(!portrait ? $(window).height() : $(window).width());
+        //         //$("#mainContainer").scrollTop(0);
+        //         //document.documentElement.scrollTop = 
+        //         document.body.scrollTop = 0;
+        //         $('body').css('overflow-x:', portrait ? 'hidden' : '');
+        //         $('body').css('overflow-y:', portrait ? '' : 'hidden');
+        //     }
+        //     window.onorientationchange = reorient;
+        //     window.setTimeout(reorient, 0);
+        //     $(window).on('scroll', function(){
+        //         $('#info').html('scrollTop: ' + document.body.scrollTop);
+        //     });
+        // });
     </script>
-      
-         
+
+
 </body>
+
 </html>
