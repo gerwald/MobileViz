@@ -1,6 +1,15 @@
 .bar {
     fill: steelblue;
 }
+.bar2 {
+    fill: darkgoldenrod;
+}
+.barShadow {
+    fill: #333;
+}   
+.barTop{
+    fill: #333;
+}
 
 .bar:hover {
     fill: brown;

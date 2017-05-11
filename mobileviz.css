@@ -1,5 +1,17 @@
-
 body {
-  overflow-x: hidden;
+    margin: 0;
 }
-body > div { -webkit-transition: all 0.5s ease-in-out; }
+
+body>div {
+    -webkit-transition: all 0.5s ease-in-out;
+}
+
+.tick {
+    pointer-events: none;
+}
+
+#mainContainer {
+    overflow-x: hidden;
+}
+
+#debugInfo {}

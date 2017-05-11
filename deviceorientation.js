@@ -1,4 +1,3 @@
-
 // https://www.audero.it/demo/device-orientation-api-demo.html 
 
 if (!('ondeviceorientation' in window)) {
@@ -30,12 +29,9 @@ if (!('ondevicemotion' in window)) {
         document.getElementById('acceleration-y').innerHTML = Math.round(event.acceleration.y);
         document.getElementById('acceleration-z').innerHTML = Math.round(event.acceleration.z);
 
-        document.getElementById('acceleration-including-gravity-x').innerHTML =
-            Math.round(event.accelerationIncludingGravity.x);
-        document.getElementById('acceleration-including-gravity-y').innerHTML =
-            Math.round(event.accelerationIncludingGravity.y);
-        document.getElementById('acceleration-including-gravity-z').innerHTML =
-            Math.round(event.accelerationIncludingGravity.z);
+        document.getElementById('acceleration-including-gravity-x').innerHTML = Math.round(event.accelerationIncludingGravity.x);
+        document.getElementById('acceleration-including-gravity-y').innerHTML = Math.round(event.accelerationIncludingGravity.y);
+        document.getElementById('acceleration-including-gravity-z').innerHTML = Math.round(event.accelerationIncludingGravity.z);
 
         document.getElementById('rotation-rate-beta').innerHTML = Math.round(event.rotationRate.beta);
         document.getElementById('rotation-rate-gamma').innerHTML = Math.round(event.rotationRate.gamma);
