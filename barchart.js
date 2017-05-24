@@ -110,6 +110,8 @@ d3.tsv("data.tsv", function (d) {
 
     g.append("g")
         .attr("class", "axis axis--y")
+		// dont know where else the offset of 12 is set.
+        .attr("transform", "translate(12,-1)")
         //.call(d3.axisRight(y).ticks(10, "%"))
         .call(d3.axisRight(y).tickValues([0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08, 0.09, 0.1]))
         .append("text")

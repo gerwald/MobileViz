@@ -7,16 +7,46 @@ if (!('ondevicemotion' in window)) {
     });  
 }
 
+var adjustScale = 1;
+var adjustDeltaX = 0;
+var adjustDeltaY = 0;
+var currentScale = null;
+var currentDeltaX = null;
+var currentDeltaY = null;
 
 var myElement = document.getElementById('mainContainer');
+//var myElement = $('.innerContainer')[0];
 var hammer = new Hammer.Manager(myElement);
 var pinch = new Hammer.Pinch();
-hammer.add(pinch);
+var pan = new Hammer.Pan();
+hammer.add([pinch, pan]);
 
-hammer.on('pinchmove', function(ev){
+hammer.on('pinch pan', function(ev){
+    
+    // Adjusting the current pinch/pan event properties using the previous ones set when they finished touching
+    currentScale = adjustScale * ev.scale;
+    currentDeltaX = adjustDeltaX + (ev.deltaX / currentScale);
+    currentDeltaY = adjustDeltaY + (ev.deltaY / currentScale);
+
     console.log('pinching...');
-    $('#debuginfo').append('Pinch; ' + ev.type + ' <br>');
-    zoom(ev.scale, ev.center.x, ev.center.y);
+    $('#debuginfo').prepend('Pinch; ' + ev.type + ' <br>');
+    //zoom(currentScale, currentDeltaX, adjustDeltaY);
+    zoom(currentScale, ev.center.x, ev.center.y);
+});
+hammer.on('pan', function(ev){
+    //pan(currentDeltaX, adjustDeltaY);
+    $('#debuginfo').prepend('Pan; ' + ev.type + ' <br>');
+});
+hammer.on('pinchmove', function(ev){
+    $('#debuginfo').prepend('pinchmove!; ');
+});
+
+
+hammer.on("panend pinchend", function (ev) {
+    // Saving the final transforms for adjustment next time the user interacts.
+    adjustScale = currentScale;
+    adjustDeltaX = currentDeltaX;
+    adjustDeltaY = currentDeltaY;
 });
 
 
@@ -26,9 +56,9 @@ var mc = new Hammer(myElement);
 
 // listen to events...
 mc.on("panleft panright tap press", function(ev) {
-    console.log(ev.type +" gesture detected.");
-    $('#debuginfo').append(ev.type + ' <br>' );
-    zoom(1.2, ev.center.x, ev.center.y);
+    //console.log(ev.type +" gesture detected.");
+    //$('#debuginfo').prepend(ev.type + ' <br>' );
+    //zoom(1.2, ev.center.x, ev.center.y);
 });  
 
 
@@ -121,6 +151,7 @@ function reset(){
     realGlobalWidth = fixedWidth;
     donotmoveUntil = new Date().getTime() + 500;
     redrawChart();
+    d3.selectAll(".innerContainer").attr("transform","");
 }
 
 
@@ -163,12 +194,14 @@ $('#testButton2').on('click', function () {
 
     devicemotion({rotationRate: {beta: 0, alpha: 500 }});
 });
+$('#resetButton').on('click', function () {
+    reset();
+});
 
 
 function zoom(scaleFactor, zoomX, zoomY){
     //.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
     d3.selectAll(".innerContainer").attr("transform",
-                  "translate(" + (-zoomX) + "," + (-zoomY) + ") " +
-                  "scale(" + scaleFactor + ") " +
-                  "translate(" + (zoomX * scaleFactor) + "," + (zoomY * scaleFactor) + ")");
+                  "translate(" + (-zoomX * (scaleFactor - 1)) + "," + (-zoomY * (scaleFactor - 1)) + ") " +
+                  "scale(" + scaleFactor + ") ");
 }
