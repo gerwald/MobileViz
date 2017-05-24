@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="utf-8">
+    <!--<meta name=viewport content="width=device-width,initial-scale=1">-->
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <link rel="stylesheet" href="deviceorientation.css">
+    <link rel="stylesheet" href="barchart.css">
+    <link rel="stylesheet" href="mobileviz.css">
+    <!--<script src="https://d3js.org/d3.v4.min.js"></script>-->
+    <script src="d3/d3.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+        crossorigin="anonymous"></script>
+    <script src="libs/hammer208.min.js"></script>
+
+</head>
+
+<body>
+
+    <div id="mainContainer" style="background-color:beige; min-width: 200px; min-height: 200px;">        
+                <svg width="960" height="300" style="background-color: red"></svg>
+    </div>
+    <span id="debuginfo"></span>
+
+    <script src="deviceorientation.js"></script>
+    <script src="barchart.js"></script>
+    <script src="mobileviz.js"></script>
+    <script>
+        (function ($) {
+            var IS_IOS = /iphone|ipad/i.test(navigator.userAgent);
+            $.fn.nodoubletapzoom = function () {
+                if (IS_IOS)
+                    $(this).bind('touchstart', function preventZoom(e) {
+                        var t2 = e.timeStamp,
+                            t1 = $(this).data('lastTouch') || t2,
+                            dt = t2 - t1,
+                            fingers = e.originalEvent.touches.length;
+                        $(this).data('lastTouch', t2);
+                        if (!dt || dt > 500 || fingers > 1) return; // not double-tap
+
+                        e.preventDefault(); // double tap - prevent the zoom
+                        // also synthesize click events we just swallowed up
+                        $(this).trigger('click').trigger('click');
+                    });
+            };
+
+            var myElement = document.getElementById('mainContainer');
+            var hammer = new Hammer.Manager(myElement);
+            var pinch = new Hammer.Pinch();
+            hammer.add(pinch);
+
+            hammer.on('pinchmove', function(ev){
+                console.log('pinching...');
+                $('#debuginfo').append('Pinch; ' + ev.scale + '; ' + ev.center.x +  ' <br>');
+            });
+
+        })(jQuery);
+    </script>
+
+
+</body>
+
+</html>

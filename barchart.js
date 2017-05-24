@@ -32,7 +32,8 @@ d3.tsv("data.tsv", function (d) {
         return d.frequency;
     })]);
 
-    var barGroup2 = g.append("g").attr("class", "bargroup2");
+    var innerContainer = g.append("g").attr("class", "innerContainer");
+    var barGroup2 = innerContainer.append("g").attr("class", "bargroup2");
     barGroup2.selectAll(".bar")
         .data(data)
         .enter().append("rect")
@@ -54,7 +55,7 @@ d3.tsv("data.tsv", function (d) {
             return x(d.letter);
         });
 
-    var chartBarGroup = g.append("g").attr("class", "bargroup");
+    var chartBarGroup = innerContainer.append("g").attr("class", "bargroup");
     var chartBarsGroup = chartBarGroup.selectAll(".bar").data(data).enter().append("g");
     chartBarsGroup.append("rect")
         .attr("class", "bar")

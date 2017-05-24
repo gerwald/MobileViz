@@ -4,12 +4,39 @@ if (!('ondevicemotion' in window)) {
 
     window.addEventListener('devicemotion', function (event) {
         devicemotion(event);
-    });
+    });  
 }
+
+
+var myElement = document.getElementById('mainContainer');
+var hammer = new Hammer.Manager(myElement);
+var pinch = new Hammer.Pinch();
+hammer.add(pinch);
+
+hammer.on('pinchmove', function(ev){
+    console.log('pinching...');
+    $('#debuginfo').append('Pinch; ' + ev.type + ' <br>');
+    zoom(ev.scale, ev.center.x, ev.center.y);
+});
+
+
+// create a simple instance
+// by default, it only adds horizontal recognizers
+var mc = new Hammer(myElement);
+
+// listen to events...
+mc.on("panleft panright tap press", function(ev) {
+    console.log(ev.type +" gesture detected.");
+    $('#debuginfo').append(ev.type + ' <br>' );
+    zoom(1.2, ev.center.x, ev.center.y);
+});  
 
 
 var fixedWidth = 32;
 var globalWidth = fixedWidth;
+var realGlobalWidth = fixedWidth;
+var enableRealWidthHandling = true;
+var rotationBetaSinceLastApply = 0;
 var start = false;
 var totalPlus = 0,
     totalMinus = 0;
@@ -30,13 +57,17 @@ function devicemotion(event){
 
         donotmoveUntil = undefined;
     }
-
+    
     if (rotationrateAlpha > 100)
         reset();        
 
-    if (rotationrateBeta > 0 && rotationrateBeta < 10 ||
-        rotationrateBeta < 0 && rotationrateBeta > -10)
-        return;
+    rotationBetaSinceLastApply += rotationrateBeta;
+    //if (rotationrateBeta > 0 && rotationrateBeta < 10 ||
+    //    rotationrateBeta < 0 && rotationrateBeta > -10)
+    //    return;
+    if (rotationBetaSinceLastApply > 0 && rotationBetaSinceLastApply < 10 ||
+        rotationBetaSinceLastApply < 0 && rotationBetaSinceLastApply > -10)
+        return;    
 
     // if (!start)
     //     return;
@@ -46,18 +77,34 @@ function devicemotion(event){
 
     //$('#debuginfo').append('<br />' + rotationrateBeta);
 
-    if (rotationrateBeta > 0)
-        totalPlus += rotationrateBeta;
+    if (rotationBetaSinceLastApply > 0)
+        totalPlus += rotationBetaSinceLastApply;
     else
-        totalMinus -= rotationrateBeta;
+        totalMinus -= rotationBetaSinceLastApply;
 
     // negativ = rotate to right.
-    globalWidth += rotationrateBeta / 100;
+    var shift = rotationBetaSinceLastApply / 100;
+    rotationBetaSinceLastApply = 0;
+    realGlobalWidth += shift;
+    if (
+        enableRealWidthHandling &&
+        (
+            realGlobalWidth < 12 && globalWidth == 12 ||
+            realGlobalWidth > fixedWidth && globalWidth == fixedWidth        
+        )
+    ){
+        // do not shift, if rotatation was "too high" before.
+        return;
+    }
 
-    if (globalWidth < 12)
+    globalWidth += shift;
+
+    if (globalWidth < 12){
         globalWidth = 12;
-    if (globalWidth > fixedWidth)
+    }
+    if (globalWidth > fixedWidth){
         globalWidth = fixedWidth;
+    }
 
     redrawChart();
     timestamp = new Date();
@@ -71,14 +118,15 @@ function copyChart() {
 
 function reset(){
     globalWidth = fixedWidth;
-    donotmoveUntil = new Date().getTime() + 1000;
+    realGlobalWidth = fixedWidth;
+    donotmoveUntil = new Date().getTime() + 500;
     redrawChart();
 }
 
 
 function redrawChart() {
     var shift = fixedWidth-globalWidth; // width has a minimum of 5, fixedWith a value of 32; shift can be 27
-    var shadowWidth = shift/2;
+    var shadowWidth = shift/3;
 
     d3.selectAll(".bar").attr("width", globalWidth);
     d3.selectAll(".barShadow")
@@ -115,3 +163,12 @@ $('#testButton2').on('click', function () {
 
     devicemotion({rotationRate: {beta: 0, alpha: 500 }});
 });
+
+
+function zoom(scaleFactor, zoomX, zoomY){
+    //.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    d3.selectAll(".innerContainer").attr("transform",
+                  "translate(" + (-zoomX) + "," + (-zoomY) + ") " +
+                  "scale(" + scaleFactor + ") " +
+                  "translate(" + (zoomX * scaleFactor) + "," + (zoomY * scaleFactor) + ")");
+}

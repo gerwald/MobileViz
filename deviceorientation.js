@@ -3,7 +3,8 @@
 if (!('ondeviceorientation' in window)) {
     document.getElementById('do-unsupported').classList.remove('hidden');
 } else {
-    document.getElementById('do-info').classList.remove('hidden');
+    if (document.getElementById('do-info'))
+        document.getElementById('do-info').classList.remove('hidden');
 
     window.addEventListener('deviceorientation', function (event) {
         document.getElementById('cube').style.webkitTransform =
@@ -22,7 +23,8 @@ if (!('ondeviceorientation' in window)) {
 if (!('ondevicemotion' in window)) {
     document.getElementById('dm-unsupported').classList.remove('hidden');
 } else {
-    document.getElementById('dm-info').classList.remove('hidden');
+    if (document.getElementById('dm-info'))
+        document.getElementById('dm-info').classList.remove('hidden');
 
     window.addEventListener('devicemotion', function (event) {
         document.getElementById('acceleration-x').innerHTML = Math.round(event.acceleration.x);
